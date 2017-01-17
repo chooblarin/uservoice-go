@@ -13,10 +13,9 @@ import (
 
 // Client represents API client
 type Client struct {
-	URL        *url.URL
-	HTTPClient *http.Client
-	consumer   *oauth.Consumer
-	token      *oauth.AccessToken
+	URL      *url.URL
+	consumer *oauth.Consumer
+	token    *oauth.AccessToken
 }
 
 // NewClient returns new Client
@@ -34,10 +33,8 @@ func NewClient(subdomain, apiKey, apiSecret string) (*Client, error) {
 	if err != nil {
 		return nil, errors.New("failed to parse url")
 	}
-
 	consumer := oauth.NewConsumer(apiKey, apiSecret, oauth.ServiceProvider{})
 	consumer.Debug(true) // TODO: disable debug flag
-
 	client := &Client{
 		URL:      parsedURL,
 		consumer: consumer,
@@ -53,13 +50,13 @@ func (c *Client) Request(method, spath string, params map[string]string) (*http.
 
 	switch method {
 	case "GET":
-		return c.consumer.Get(url, params, nil)
+		return c.consumer.Get(url, nil, &oauth.AccessToken{})
 	case "POST":
 		m, err := json.Marshal(params)
 		if err != nil {
 			return nil, err
 		}
-		return c.consumer.PostJson(url, string(m), nil)
+		return c.consumer.PostJson(url, string(m), &oauth.AccessToken{})
 	default:
 		// TODO: Support PUT and DELETE
 		return nil, errors.New("PUT and DELETE calls are not supported")
